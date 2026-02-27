@@ -1,0 +1,734 @@
+P16 assembler v1.5 (Feb  9 2024)	c:\UNI\2�SEMESTRE\ARQUITETURA DE COMPUTADORES\PROJETO\PROJETOAC1.lst	Wed Jun 05 23:50:59 2024
+
+Sections
+Index   Name            Address   Size
+0       startup         0000      0014 20
+1       .text           0014      0252 594
+2       .data           0266      0016 22
+3       .stack          027C      0040 64
+
+Symbols
+Name                    Type      Value       Section
+_start                  LABEL     0004 4      startup
+array                   LABEL     026C 620    .data
+array_addr              LABEL     01AE 430    .text
+BLINK_TIME              ABSOLUTE  0005 5      startup
+button_pressed          LABEL     0078 120    .text
+check_pedestrian_button LABEL     005E 94     .text
+CLEAR_ALL_BITS          ABSOLUTE  003F 63     startup
+config                  LABEL     00EC 236    .text
+config_check            LABEL     0102 258    .text
+CONFIG_MASK             ABSOLUTE  0010 16     startup
+CPSR_BIT_I              ABSOLUTE  0010 16     startup
+crossing_time           LABEL     019C 412    .text
+DEFAULT_CROSSING_TIME   ABSOLUTE  0064 100    startup
+end                     LABEL     0088 136    .text
+end_if                  LABEL     005C 92     .text
+end_state               LABEL     00EA 234    .text
+end_state_config        LABEL     019A 410    .text
+FLASHING_OFF_DO         ABSOLUTE  0002 2      startup
+FLASHING_ON_DO          ABSOLUTE  0001 1      startup
+FLASHING_ON_ENTRY       ABSOLUTE  0000 0      startup
+inport_addr             LABEL     01EE 494    .text
+INPORT_ADDRESS          ABSOLUTE  FF80 65408  startup
+inport_read             LABEL     01E8 488    .text
+isr                     LABEL     01B0 432    .text
+isr_addr                LABEL     0012 18     startup
+line#78                 LABEL     000C 12     startup
+main                    LABEL     0014 20     .text
+main_addr               LABEL     0010 16     startup
+main_loop               LABEL     0034 52     .text
+MODE_A                  ABSOLUTE  0030 48     startup
+MODE_G                  ABSOLUTE  0020 32     startup
+MODE_MASK               ABSOLUTE  0030 48     startup
+MODE_R                  ABSOLUTE  0010 16     startup
+outport_addr            LABEL     0234 564    .text
+OUTPORT_ADDRESS         ABSOLUTE  FFC0 65472  startup
+outport_clear_bits      LABEL     0212 530    .text
+outport_img             LABEL     0266 614    .data
+outport_img_addr        LABEL     022C 556    .text
+outport_init            LABEL     0222 546    .text
+OUTPORT_INIT_VAL        ABSOLUTE  0000 0      startup
+outport_set_bits        LABEL     0204 516    .text
+outport_write           LABEL     022E 558    .text
+outport_write_bits      LABEL     01F0 496    .text
+PEDESTRIAN_BUTTON       ABSOLUTE  0001 1      startup
+PEDESTRIAN_LIGHT_A      ABSOLUTE  000C 12     startup
+PEDESTRIAN_LIGHT_G      ABSOLUTE  0008 8      startup
+PEDESTRIAN_LIGHT_MASK   ABSOLUTE  000C 12     startup
+PEDESTRIAN_LIGHT_R      ABSOLUTE  0004 4      startup
+previous_button_addr    LABEL     0092 146    .text
+previous_button_addr1   LABEL     026A 618    .data
+PTC_ADDR                LABEL     0264 612    .text
+PTC_ADDRESS             ABSOLUTE  FF40 65344  startup
+ptc_clr_irq             LABEL     025E 606    .text
+PTC_CMD_START           ABSOLUTE  0000 0      startup
+PTC_CMD_STOP            ABSOLUTE  0001 1      startup
+ptc_get_value           LABEL     0258 600    .text
+ptc_init                LABEL     0236 566    .text
+ptc_start               LABEL     0248 584    .text
+ptc_stop                LABEL     0250 592    .text
+PTC_TC                  ABSOLUTE  0004 4      startup
+PTC_TCR                 ABSOLUTE  0000 0      startup
+PTC_TIR                 ABSOLUTE  0006 6      startup
+PTC_TMR                 ABSOLUTE  0002 2      startup
+STACK_SIZE              ABSOLUTE  0040 64     startup
+stack_top               LABEL     02BC 700    .stack
+stack_top_addr          LABEL     000E 14     startup
+state_config            LABEL     013C 316    .text
+STATE_CONFIG            ABSOLUTE  0001 1      startup
+state_cross             LABEL     0108 264    .text
+STATE_CROSS             ABSOLUTE  0002 2      startup
+STATE_CROSS_D           ABSOLUTE  0004 4      startup
+STATE_CROSS_E           ABSOLUTE  0003 3      startup
+state_cross_end         LABEL     013A 314    .text
+state_cross_end_time    LABEL     0136 310    .text
+state_cross_entry       LABEL     0122 290    .text
+state_delay             LABEL     012A 298    .text
+state_flashing_off      LABEL     00CE 206    .text
+state_flashing_off_config LABEL     0176 374    .text
+state_flashing_off_do   LABEL     00DC 220    .text
+state_flashing_off_do_config LABEL     018A 394    .text
+state_flashing_on_do    LABEL     00C0 192    .text
+state_flashing_on_do_config LABEL     0168 360    .text
+state_flashing_on_entry LABEL     00B2 178    .text
+state_flashing_on_entry_config LABEL     0154 340    .text
+state_initial           LABEL     0094 148    .text
+STATE_INITIAL           ABSOLUTE  0000 0      startup
+sysclk                  LABEL     0268 616    .data
+sysclk_addr             LABEL     01E6 486    .text
+SYSCLK_FREQ             ABSOLUTE  0063 99     startup
+sysclk_get_ticks        LABEL     01E0 480    .text
+sysclk_init             LABEL     01C8 456    .text
+TIME                    ABSOLUTE  00E0 224    startup
+TRAFFIC_LIGHT_A         ABSOLUTE  0003 3      startup
+TRAFFIC_LIGHT_G         ABSOLUTE  0002 2      startup
+TRAFFIC_LIGHT_MASK      ABSOLUTE  0003 3      startup
+TRAFFIC_LIGHT_R         ABSOLUTE  0001 1      startup
+
+Code listing
+   1           	; Ficheiro:  PROJETOAC1.S
+   2           	; Descricao: Programa do projeto final de Arquitetura de Computadores
+   3           	; Autores: Margarita Sysoeva, Pilar Goncalves e Cecilia Marino
+   4           	; Data: 05-06-2024
+   5           	
+   6           	; Definicao dos valores dos simbolos utilizados no programa
+   7           	;
+   8          		.equ	CPSR_BIT_I, 0b010000          ; Mascara para o bit I do registo CPSR
+   9          		.equ	STACK_SIZE, 64                ; Dimensao do stack - 64 B
+  10           	
+  11           		; Definicoes do porto de entrada
+  12          		.equ	INPORT_ADDRESS, 0xFF80        ; Endereco do porto de entrada
+  13           	
+  14           		; Definicoes do porto de saida
+  15          		.equ	OUTPORT_ADDRESS, 0xFFC0       ; Endereco do porto de saida
+  16          		.equ	OUTPORT_INIT_VAL, 0           ; Valor inicial do porto de saida
+  17           	
+  18           		; Definicoes do circuito pTC
+  19          		.equ	PTC_ADDRESS,  0xFF40          ; Endereco do circuito pTC
+  20           	
+  21          		.equ	PTC_TCR, 0                    ; Deslocamento do registo TCR do pTC
+  22          		.equ	PTC_TMR, 2                    ; Deslocamento do registo TMR do pTC
+  23          		.equ	PTC_TC,  4                    ; Deslocamento do registo TC do pTC
+  24          		.equ	PTC_TIR, 6                    ; Deslocamento do registo TIR do pTC
+  25           	
+  26          		.equ	PTC_CMD_START, 0              ; Comando para iniciar a contagem no pTC
+  27          		.equ	PTC_CMD_STOP, 1               ; Comando para parar a contagem no pTC
+  28           	
+  29          		.equ	SYSCLK_FREQ, 0x63             ; Intervalo de contagem do circuito pTC que suporta a implementacao do sysclk
+  30           	
+  31           	
+  32           		; Outras definicoes      
+  33           	
+  34          		.equ BLINK_TIME, 5                    ; Tempo que o LED demora a piscar (0,5s)
+  35          	    .equ DEFAULT_CROSSING_TIME, 100       ; Tempo da passagem dos peoes (10s)
+  36           	
+  37          	    .equ STATE_INITIAL, 0                 ; Valor atribuido ao estado inicial
+  38          	    .equ STATE_CONFIG, 1                  ; Valor atribuido ao estado de configuracao
+  39          	    .equ STATE_CROSS, 2                   ; Valor atribuido ao estado de passagem dos peoes
+  40           	
+  41          		.equ TRAFFIC_LIGHT_R, 0x01            ; Mascara para o LED 01 do LAPI acender a vermelho
+  42          		.equ TRAFFIC_LIGHT_G, 0x02            ; Mascara para o LED 01 do LAPI acender a verde
+  43          	    .equ TRAFFIC_LIGHT_A, 0x03            ; Mascara para o LED 01 do LAPI acender a amarelo
+  44          		.equ PEDESTRIAN_LIGHT_R, 0x04         ; Mascara para o LED 02 do LAPI acender a vermelho
+  45          		.equ PEDESTRIAN_LIGHT_G, 0x08         ; Mascara para o LED 02 do LAPI acender a verde
+  46          	    .equ PEDESTRIAN_LIGHT_A, 0x0C         ; Mascara para o LED 02 do LAPI acender a amarelo
+  47          		.equ MODE_R, 0x10                     ; Mascara para o LED 03 do LAPI acender a vermelho
+  48          		.equ MODE_G, 0x20                     ; Mascara para o LED 03 do LAPI acender a verde     
+  49          	    .equ MODE_A, 0x30                     ; Mascara para o LED 03 do LAPI acender a amarelo
+  50           	
+  51          		.equ TRAFFIC_LIGHT_MASK, 0x03         ; Mascara para o LED 01 do LAPI
+  52          	    .equ PEDESTRIAN_LIGHT_MASK, 0x0C      ; Mascara para o LED 02 do LAPI
+  53          	    .equ MODE_MASK, 0x30                  ; Mascara para o LED 03 do LAPI
+  54           	    
+  55          	    .equ PEDESTRIAN_BUTTON, 0x01          ; Mascara para o botao PB1 do LAPI
+  56          		.equ CONFIG_MASK, 0x10                ; Mascara para o interruptor 4 do DIP-switch SW1 da placa SDP16
+  57          		.equ TIME, 0xE0                       ; Mascara para os interruptores 5 a 7 do DIP-switch da placa SPD16
+  58           	
+  59          	    .equ CLEAR_ALL_BITS, 0x3F             ; Mascara para todos os bits do outport correspondentes aos 3 LEDs
+  60           	
+  61          	    .equ FLASHING_ON_ENTRY, 0             ; Valor atribuido ao estado onde acende o LED
+  62          	    .equ FLASHING_ON_DO, 1                ; Valor atribuido ao estado onde é verificado se já se passaram 0,5s em que o LED estava aceso
+  63          	    .equ FLASHING_OFF_DO, 2               ; Valor atribuido ao estado onde é verificado se já se passaram 0,5s em que o LED estava apagado
+  64           	
+  65          	    .equ STATE_CROSS_E, 3                 ; Valor atribuido ao estado state_cross_entry
+  66          	    .equ STATE_CROSS_D, 4                 ; Valor atribuido ao estado state_cross_delay
+  67           	
+  68           	; Seccao: startup
+  69           	; Descricao: Guarda o código de arranque do sistema
+  70           		.section startup 
+  71 0000 01 58		b	_start
+  72 0002 7F 0C		ldr	pc, isr_addr
+  73           	_start:
+  74 0004 4D 0C		ldr	sp, stack_top_addr
+  75 0006 80 B7	    mov r0, pc
+  76 0008 0E A2	    add lr, r0, #4
+  77 000A 2F 0C		ldr	pc, main_addr
+  78 000C FF 5B	    b   .
+  79           	
+  80           	stack_top_addr:
+  81 000E BC 02		.word	stack_top
+  82           	main_addr:
+  83 0010 14 00		.word	main
+  84           	isr_addr:
+  85 0012 B0 01		.word	isr
+  86           	
+  87           	; Secção: text
+  88           	; Descrição: Guarda o código do programa
+  89           		.text 
+  90           	
+  91           	; Rotina:    main
+  92           	; Descricao: 
+  93           	; Entradas:  -
+  94           	; Saidas:    -
+  95           	; Efeitos:   
+  96           	main:
+  97 0014 00 60		mov	r0, #OUTPORT_INIT_VAL             ; Guarda o valor inicial do porto de saida (0)
+  98 0016 05 5D		bl	outport_init                      ; Apaga todos os LEDs
+  99 0018 30 66		mov	r0, #SYSCLK_FREQ                  
+ 100 001A 0D 5D		bl	ptc_init                          
+ 101 001C 60 B0		mrs	r0, cpsr                          ; Coloca o conteudo do CPSR para o registo r0
+ 102 001E 01 61		mov	r1, #CPSR_BIT_I                   
+ 103 0020 80 C8		orr r0, r0, r1                        ; Coloca a flag I a 1
+ 104 0022 40 B0		msr	cpsr, r0
+ 105 0024 E1 5C	    bl inport_read                
+ 106 0026 11 60	    mov r1, #PEDESTRIAN_BUTTON
+ 107 0028 11 C0	    and r1, r1, r0                        ; Verifica o estado do botao dos peoes
+ 108 002A 32 0F	    ldr r2, previous_button_addr          
+ 109 002C 21 20	    str r1, [r2, #0]                      ; Guarda no endereco de memoria correspondente o estado do botao anterior
+ 110 002E 05 60	    mov r5, #0                            ; Carrega o registo r5 a 0 para comecar no estado inicial
+ 111 0030 06 60	    mov r6, #0                            ; Carrega o registo r6 a 0 para comecar no state_flashing_on_entry, quando for para o estado inicial
+ 112 0032 37 60	    mov r7, #3                            ; Carrega o registo r7 a 0MMMMMMM para comecar no state_flashing_on_entry_config, quando for para o estado de configuração
+ 113           	main_loop: 
+ 114           	; r5 = sm_state
+ 115 0034 5B 5C	    bl config                             ; Verifica se o switch config esta a 1 ou a 0
+ 116 0036 10 60	    mov r0, #STATE_CONFIG
+ 117 0038 50 B8	    cmp r5, r0
+ 118 003A 80 40	    beq state_config                      ; Caso o config esteja a 1 vai para o estado de configuracao
+ 119 003C 10 5C	    bl check_pedestrian_button            ; Verifica se o botao dos peoes foi precionado 
+ 120 003E 10 60	    mov r0, #STATE_CONFIG
+ 121 0040 50 B8	    cmp r5, r0                            
+ 122 0042 7C 40	    beq state_config                      ; Se for igual vai para o estado de configuracao
+ 123 0044 20 60	    mov r0, #STATE_CROSS
+ 124 0046 50 B8	    cmp r5, r0                             
+ 125 0048 5F 40	    beq state_cross                       ; Se for igual vai para o estado de passagem dos peoes
+ 126 004A 30 60	    mov r0, #STATE_CROSS_E
+ 127 004C 60 B8	    cmp r6, r0
+ 128 004E 69 40	    beq state_cross_entry                ; Se for igual vai para o estado onde o é guardado o tempo de referencia 
+ 129 0050 40 60	    mov r0, #STATE_CROSS_D
+ 130 0052 60 B8	    cmp r6, r0
+ 131 0054 6A 40	    beq state_delay                      ; Se for igual vai para o estado onde é calculado o tempo decorrido
+ 132 0056 00 60	    mov r0, #STATE_INITIAL
+ 133 0058 50 B8	    cmp r5, r0                            
+ 134 005A 1C 40	    beq state_initial                     ; Se for igual vai para o estado inicial 
+ 135           	end_if:
+ 136 005C EB 5B	    b main_loop
+ 137           	
+ 138           	; Rotina: pedestrian_button
+ 139           	; Descrição: Verifica se houve uma transicao ascendente do botao e caso isto se verifique muda para o estado de passagem de peoes
+ 140           	check_pedestrian_button:
+ 141 005E 0E 24	    push lr                               
+ 142 0060 04 24	    push r4                               ; Guarda os valores na pilha
+ 143 0062 11 60	    mov r1, #PEDESTRIAN_BUTTON            ; Carrega no registo r1 a mascara correspondente ao botao dos peoes
+ 144 0064 62 0D	    ldr r2, previous_button_addr
+ 145 0066 23 08	    ldrb r3, [r2, #0]                     ; Copia um byte da memória para o registo r3
+ 146 0068 B3 C0	    and r3, r3, r1                        ; Guarda o estado anterior do botao no registo r3
+ 147 006A BE 5C	    bl inport_read                        
+ 148 006C 11 60	    mov r1, #PEDESTRIAN_BUTTON            ; Carrega no registo r1 a mascara correspondente ao botao dos peoes
+ 149 006E 14 C0	    and r4, r1, r0                        ; Guarda o estado atual do botao no registo r4
+ 150 0070 01 60	    mov r1, #0
+ 151 0072 B0 B8	    cmp r3, r1                            ; Compara o estado anterior do botão com 0
+ 152 0074 01 40	    beq button_pressed                    ; Se o botao estiver a 0, significa que estava a ser precionado, logo precisamos de ver o seu estado atual (se foi solto ou nao)
+ 153 0076 08 58	    b end                                 ; Se o botao nao estava a ser precionado, nao vai ser preciso ver se foi solto ou nao
+ 154           	button_pressed:
+ 155 0078 11 60	    mov r1, #1
+ 156 007A 10 BA	    cmp r1, r4                            ; Compara o estado atual do botão com 1
+ 157 007C 05 44	    bne end                               ; Caso o botao continue a 0, significa que nao foi solto
+ 158 007E 92 0C	    ldr r2, previous_button_addr          ; Caso tenho passado para 1, significa que houve uma transicao ascendente, logo o botao foi solto
+ 159 0080 24 20	    str r4, [r2, #0]                      ; Guarda o estado atual do botao no endereco de memoria correspondente
+ 160           	    ;mov r11, #1
+ 161 0082 25 60	    mov r5, #2                            ; Muda para o estado de passagem dos peos
+ 162 0084 04 04	    pop r4
+ 163 0086 0F 04	    pop pc                       
+ 164           	end:
+ 165 0088 42 0C	    ldr r2, previous_button_addr 
+ 166 008A 24 20	    str r4, [r2, #0]                      ; Guarda o estado atual do botao no endereco de memoria correspondente
+ 167 008C 05 60	    mov r5, #0                            ; Continua no estado inicial
+ 168 008E 04 04	    pop r4
+ 169 0090 0F 04	    pop pc                                ; Retira os valores da pilha
+ 170           	
+ 171           	previous_button_addr:
+ 172 0092 6A 02	    .word previous_button_addr1
+ 173           	    
+ 174           	; Rotina: state_initial
+ 175           	; Descrição: Acende o LED L3 a verde, o LED L2 a vermelho e o LED L1 a amarelo intermitente 
+ 176           	state_initial: 
+ 177           	; r6 = sm_state
+ 178           	    ;mov r0, #CLEAR_ALL_BITS              ; Seleciona todos os bits do outport que vao ser alterados
+ 179           	    ;bl outport_clear_bits                ; Coloca os bits selecionados a 0, ou seja, apaga todos os leds
+ 180 0094 00 63	    mov r0, #MODE_MASK                    ; Seleciona os bits do outport correspondentes ao modo que vao ser alterados
+ 181 0096 01 62	    mov r1, #MODE_G                       ; Seleciona apenas o bit da cor pretendida (verde)
+ 182 0098 AB 5C	    bl outport_write_bits                 ; Coloca apenas o bit correspondente à cor a 1 e o outro a 0, ou seja, LED L3 liga a verde
+ 183 009A C0 60	    mov r0, #PEDESTRIAN_LIGHT_MASK        ; Seleciona os bits do outport correspondestes ao led dos peõs que vao ser alterados
+ 184 009C 41 60	    mov r1, #PEDESTRIAN_LIGHT_R           ; Seleciona apenas o bit da cor pretendida (vermelho)
+ 185 009E A8 5C	    bl outport_write_bits                 ; Coloca apenas o bit correspondente à cor a 1 e o outro a 0, ou seja, LED L2 liga a vermelho  
+ 186           	
+ 187 00A0 00 60	    mov r0, #FLASHING_ON_ENTRY            
+ 188 00A2 60 B8	    cmp r6, r0                            
+ 189 00A4 06 40	    beq state_flashing_on_entry           ; Se for igual vai para o estado onde o LED é acesso 
+ 190 00A6 10 60	    mov r0, #FLASHING_ON_DO               
+ 191 00A8 60 B8	    cmp r6, r0 
+ 192 00AA 0A 40	    beq state_flashing_on_do              ; Se for igual vai para o estado onde é verificado se já se passaram 0,5s em que o LED estava aceso
+ 193 00AC 20 60	    mov r0, #FLASHING_OFF_DO
+ 194 00AE 60 B8	    cmp r6, r0
+ 195 00B0 15 40	    beq state_flashing_off_do             ; Se for igual vai para o estado onde é verificado se já se passaram 0,5s em que o LED estava apagado
+ 196           	state_flashing_on_entry:
+ 197 00B2 30 60	    mov r0, #TRAFFIC_LIGHT_MASK           ; Seleciona os bits do outport correspondentes ao led do transito de veiculos que vao ser alterados
+ 198 00B4 31 60	    mov r1, #TRAFFIC_LIGHT_A              ; Seleciona apenas os bits da cor pretendida (amarelo)
+ 199 00B6 9C 5C	    bl outport_write_bits                 ; Coloca apenas os bits correspondente à cor a 1, ou seja, LED L1 liga a amarelo
+ 200 00B8 93 5C	    bl sysclk_get_ticks
+ 201 00BA 04 B0	    mov r4, r0                            ; Carrega o registo r4 com o tempo de referencia
+ 202 00BC 16 60	    mov r6, #1                            ; Carrega o registo r6 a 1 para passar para o estado onde se calcula o tempo decorrido
+ 203 00BE 15 58	    b end_state
+ 204           	state_flashing_on_do:
+ 205 00C0 8F 5C	    bl sysclk_get_ticks 
+ 206 00C2 00 8A	    sub r0, r0, r4                        ; Guarda no registo r0 a subtração entre o tempo atual e o tempo de referencia
+ 207 00C4 51 60	    mov r1, #BLINK_TIME
+ 208 00C6 80 B8	    cmp r0, r1                            ; Compara o tempo de piscar com o resultado da subtração
+ 209 00C8 02 48	    bhs state_flashing_off                ; Se esse resultado for superior a 0,5s entao vai para o estado em que o LED apaga
+ 210 00CA 16 60	    mov r6, #1                            ; Caso esse resultado ainda foi menor que os 0,5s entao carrega o registo r6 a 1 para voltar ao estado onde se calcula o tempo decorrido
+ 211 00CC 0E 58	    b end_state
+ 212           	state_flashing_off:
+ 213 00CE 30 60	    mov r0, #TRAFFIC_LIGHT_MASK          ; Seleciona os bits do outport correspondentes ao transito de veiculos que vao ser alterados
+ 214 00D0 01 60	    mov r1, #0x00                        
+ 215 00D2 8E 5C	    bl outport_write_bits                ; Apaga todos o LED dos bits selecionados
+ 216 00D4 85 5C	    bl sysclk_get_ticks
+ 217 00D6 04 B0	    mov r4, r0                           ; Carrega o registo r4 com o tempo de referencia
+ 218 00D8 26 60	    mov r6, #2                           ; Carrega o registo r6 a 2 para passar para o estado onde se calcula o tempo decorrido
+ 219 00DA 07 58	    b end_state
+ 220           	state_flashing_off_do:
+ 221 00DC 81 5C	    bl sysclk_get_ticks
+ 222 00DE 00 8A	    sub r0, r0, r4                       ; Guarda no registo r0 a subtração entre o tempo atual e o tempo de referencia
+ 223 00E0 51 60	    mov r1, #BLINK_TIME
+ 224 00E2 80 B8	    cmp r0, r1                           ; Compara o tempo de piscar com o resultado da subtração
+ 225 00E4 E6 4B	    bhs state_flashing_on_entry          ; Se esse resultado for superior a 0,5s entao vai para o estado em que o LED liga novamente
+ 226 00E6 26 60	    mov r6, #2                           ; Caso esse resultado ainda foi menor que os 0,5s entao carrega o registo r6 a 1 para voltar ao estado onde se calcula o tempo decorrido
+ 227 00E8 00 58	    b end_state
+ 228           	end_state: 
+ 229 00EA B8 5B	    b end_if                             ; Volta a funcao main_loop
+ 230           	
+ 231           	; Rotina: config
+ 232           	; Descrição: Verifica o valor do switch config, caso esteja a 1 passa para o estado de configuracao e se estiver a 0 passa para o estado operacao (inicial ou da passegem dos peoes)
+ 233           	config:
+ 234 00EC 0E 24	    push lr
+ 235 00EE 04 24	    push r4
+ 236 00F0 7B 5C	    bl inport_read
+ 237 00F2 01 61	    mov r1, #CONFIG_MASK
+ 238 00F4 11 C0	    and r1, r1, r0                       ; Guarda no registo r1 o estado do switch config
+ 239 00F6 04 60	    mov r4, #0
+ 240 00F8 10 BA	    cmp r1, r4                           ; Compara o estado do config a 0
+ 241 00FA 03 44	    bzc config_check                     ; Se o resultado da comparacao nao for zero, significa que o config esta a 1
+ 242 00FC 05 60	    mov r5, #0                           ; Carrega o registo r5 para ir para o estado inicial
+ 243 00FE 04 04	    pop r4
+ 244 0100 0F 04	    pop pc
+ 245           	config_check:
+ 246 0102 15 60	    mov r5, #1                           ; Carrega o registo r5 para ir para o estado de configuracao
+ 247 0104 04 04	    pop r4
+ 248 0106 0F 04	    pop pc
+ 249           	
+ 250           	; Rotina: state_cross
+ 251           	; Descrição: Acende o LED L3 a verde, o LED L2 a verde e o LED L1 a vermelho 
+ 252           	;            O sistema mantem-se neste estado, no minimo, durante um periodo de tempo CROSSING_TIME 
+ 253           	;            Este tempo é estendido por iguais periodos sempre que for detetada uma nova transicao ascendente no sinal PEDESTRIAN_BUTTON 
+ 254           	state_cross:
+ 255           	; r6 = sm_state 
+ 256 0108 F0 63	    mov r0, #CLEAR_ALL_BITS              ; Seleciona todos os bits do outport que vao ser alterados
+ 257 010A 83 5C	    bl outport_clear_bits                ; Coloca os bits selecionados a 0, ou seja, apaga todos os leds
+ 258 010C 00 63	    mov r0, #MODE_MASK                   ; Seleciona os bits do outport correspondentes ao modo que vao ser alterados
+ 259 010E 01 62	    mov r1, #MODE_G                      ; Seleciona apenas o bit da cor pretendida (verde)
+ 260 0110 6F 5C	    bl outport_write_bits                ; Coloca apenas o bit correspondente à cor a 1 e o outro a 0, ou seja, LED L3 liga a verde
+ 261 0112 C0 60	    mov r0, #PEDESTRIAN_LIGHT_MASK       ; Seleciona os bits do outport correspondestes ao led dos peõs que vao ser alterados
+ 262 0114 81 60	    mov r1, #PEDESTRIAN_LIGHT_G          ; Seleciona apenas o bit da cor pretendida (verde)
+ 263 0116 6C 5C	    bl outport_write_bits                ; Coloca apenas o bit correspondente à cor a 1 e o outro a 0, ou seja, LED L2 liga a verde
+ 264 0118 30 60	    mov r0, #TRAFFIC_LIGHT_MASK          ; Seleciona os bits do outport correspondestes ao led do transito dos veiculos que vao ser alterados
+ 265 011A 11 60	    mov r1, #TRAFFIC_LIGHT_R             ; Seleciona apenas o bit da cor pretendida (vermelho)
+ 266 011C 69 5C	    bl outport_write_bits                ; Coloca apenas o bit correspondente à cor a 1 e o outro a 0, ou seja, LED L1 liga a vermelho
+ 267 011E 36 60	    mov r6, #STATE_CROSS_E               ; Carrega o registo r6 com o valor da constante STATE_CROSS_E (3)
+ 268 0120 05 60	    mov r5, #0                           ; Carrega o registo r5 com 0 para voltar ao estado inicial
+ 269           	
+ 270           	state_cross_entry:
+ 271 0122 5E 5C	    bl sysclk_get_ticks
+ 272 0124 04 B0	    mov r4, r0                           ; Carrega o registo r4 com o tempo de referencia
+ 273 0126 46 60	    mov r6, #4                           ; Carrega o registo r6 a 4 para passar para a proxima rotina    
+ 274 0128 08 58	    b state_cross_end
+ 275           	
+ 276           	state_delay:
+ 277 012A 5A 5C	    bl sysclk_get_ticks
+ 278 012C 00 8A	    sub r0, r0, r4                       ; Calcula o tempo decorrido, fazendo a subtracao entre o tempo atual e o tempo referencia
+ 279 012E 00 BC	    cmp r0, r8                           ; Compara o tempo decorrido com o tempo definido para a passagem dos peoes
+ 280 0130 02 48	    bhs state_cross_end_time             ; Caso o tempo decorrido for maior ou igual ao tempo definido entao vai para o main_loop 
+ 281 0132 46 60	    mov r6, #4                           
+ 282 0134 02 58	    b state_cross_end                    ; Caso o tempo percorrido seja inferior ao tempo definido entao volta a mesma rotina 
+ 283           	
+ 284           	state_cross_end_time:
+ 285 0136 16 60	    mov r6, #1                           ; Carrega o registo r6 com 1 para nao ir para nenhum estado do state_cross
+ 286 0138 00 58	    b state_cross_end                    ; Vai para o main_loop e depois para o estado inicial
+ 287           	
+ 288           	state_cross_end:
+ 289 013A 90 5B	    b end_if                             ; Volta a funcao main_loop
+ 290           	
+ 291           	
+ 292           	; Rotina: state_config
+ 293           	; Descricao: Acende o LED L3 a amarelo, o LED L2 a verde intermitente e o LED L1 a amarelo intermitente. 
+ 294           	;            Define o valor do periodo de tempo CROSSING_TIME alterando a combinacao nos bits da entrada TIME
+ 295           	state_config: 
+ 296           	; r6 = sm_state
+ 297           	
+ 298 013C 00 63	    mov r0, #MODE_MASK                   ; Seleciona os bits do outport correspondentes ao modo que vao ser alterados
+ 299 013E 01 63	    mov r1, #MODE_A                      ; Seleciona os bits da cor pretendida (amarelo)
+ 300 0140 61 5C	    bl outport_set_bits                  ; Coloca os bits correspondente à cor a 1, ou seja, LED L3 liga a amarelo
+ 301           	
+ 302 0142 00 60	    mov r0, #FLASHING_ON_ENTRY           
+ 303 0144 60 B8	    cmp r6, r0
+ 304 0146 06 40	    beq state_flashing_on_entry_config   ; Se for igual vai para o estado onde o LED é acesso
+ 305 0148 10 60	    mov r0, #FLASHING_ON_DO
+ 306 014A 60 B8	    cmp r6, r0 
+ 307 014C 0D 40	    beq state_flashing_on_do_config      ; Se for igual vai para o estado onde é verificado se já se passaram 0,5s em que o LED estava aceso
+ 308 014E 20 60	    mov r0, #FLASHING_OFF_DO
+ 309 0150 60 B8	    cmp r6, r0
+ 310 0152 1B 40	    beq state_flashing_off_do_config     ; Se for igual vai para o estado onde é verificado se já se passaram 0,5s em que o LED estava apagado
+ 311           	 
+ 312           	state_flashing_on_entry_config:
+ 313 0154 30 60	    mov r0, #TRAFFIC_LIGHT_MASK          ; Seleciona os bits do outport correspondentes ao led do transito de veiculos que vao ser alterados
+ 314 0156 31 60	    mov r1, #TRAFFIC_LIGHT_A             ; Seleciona apenas os bits da cor pretendida (amarelo)
+ 315 0158 4B 5C	    bl outport_write_bits                ; Coloca apenas os bits correspondente à cor a 1, ou seja, LED L1 liga a amarelo
+ 316 015A C0 60	    mov r0, #PEDESTRIAN_LIGHT_MASK       ; Selelciona os bits do outport correspondentes ao led dos peoes que vao ser alterados
+ 317 015C 81 60	    mov r1, #PEDESTRIAN_LIGHT_G          ; Seleciona apenas o bit da cor pretendida (verde)
+ 318 015E 48 5C	    bl outport_write_bits                ; Coloca apenas o bit correspondente à cor a 1 e o outro a 0, ou seja, LED L2 liga a verde
+ 319 0160 3F 5C	    bl sysclk_get_ticks
+ 320 0162 04 B0	    mov r4, r0                           ; Carrega o registo r4 com o tempo de referencia
+ 321 0164 16 60	    mov r6, #1                           ; Carrega o registo r6 a 1 para passar para a proxima rotina
+ 322 0166 19 58	    b end_state_config
+ 323           	state_flashing_on_do_config:             
+ 324 0168 3B 5C	    bl sysclk_get_ticks
+ 325 016A 00 8A	    sub r0, r0, r4                       ; Guarda no registo r0 a subtração entre o tempo atual e o tempo de referencia
+ 326 016C 51 60	    mov r1, #BLINK_TIME
+ 327 016E 80 B8	    cmp r0, r1                           ; Compara o tempo de piscar com o resultado da subtração
+ 328 0170 02 48	    bhs state_flashing_off_config        ; Se esse resultado for superior a 0,5s entao vai para o estado em que o LED apaga
+ 329 0172 16 60	    mov r6, #1                           ; Caso esse resultado ainda foi menor que os 0,5s entao carrega o registo r6 a 1 para voltar ao estado onde se calcula o tempo decorrido
+ 330 0174 12 58	    b end_state_config
+ 331           	state_flashing_off_config:
+ 332 0176 30 60	    mov r0, #TRAFFIC_LIGHT_MASK          ; Seleciona os bits do outport correspondentes ao transito de veiculos que vao ser alterados
+ 333 0178 01 60	    mov r1, #0x00                        
+ 334 017A 3A 5C	    bl outport_write_bits                ; Apaga todos o LED dos bits selecionados
+ 335 017C C0 60	    mov r0, #PEDESTRIAN_LIGHT_MASK       ; Seleciona os bits do outport correspondentes ao transito de veiculos que vao ser alterados
+ 336 017E 01 60	    mov r1, #0x00                  
+ 337 0180 37 5C	    bl outport_write_bits                ; Apaga todos o LED dos bits selecionados
+ 338 0182 2E 5C	    bl sysclk_get_ticks
+ 339 0184 04 B0	    mov r4, r0                           ; Carrega o registo r4 com o tempo de referencia
+ 340 0186 26 60	    mov r6, #2                           ; Carrega o registo r6 a 2 para passar para o estado onde se calcula o tempo decorrido
+ 341 0188 08 58	    b end_state_config
+ 342           	state_flashing_off_do_config:
+ 343 018A 2A 5C	    bl sysclk_get_ticks                  
+ 344 018C 00 8A	    sub r0, r0, r4                       ; Guarda no registo r0 a subtração entre o tempo atual e o tempo de referencia
+ 345 018E 51 60	    mov r1, #BLINK_TIME
+ 346 0190 80 B8	    cmp r0, r1                           ; Compara o tempo de piscar com o resultado da subtração
+ 347 0192 E0 4B	    bhs state_flashing_on_entry_config   ; Se esse resultado for superior a 0,5s entao vai para o estado em que o LED acende novamente
+ 348 0194 26 60	    mov r6, #2                           ; Caso esse resultado ainda foi menor que os 0,5s entao carrega o registo r6 a 1 para voltar ao estado onde se calcula o tempo decorrido
+ 349 0196 02 5C	    bl crossing_time                     ; Chama a funcao crossing_time para alterar os valores definidos nos bits correspondentes ao TIME
+ 350 0198 00 58	    b end_state_config
+ 351           	end_state_config: 
+ 352 019A 60 5B	    b end_if                             ; Volta a funcao main_loop
+ 353           	
+ 354           	; Rotina: crossing_time
+ 355           	; Descricao: Le os bits correspondestes ao TIME e guarda no registo r8 o valor definido para a passagem dos peoes 
+ 356           	crossing_time:
+ 357 019C 0E 24	    push lr
+ 358 019E 24 5C	    bl inport_read
+ 359 01A0 01 6E	    mov r1, #TIME                       ; Carrega o registo r1 com a mascara do TIME
+ 360 01A2 80 C0	    and r0, r0, r1                      ; Copia para o registo r0 o valor dos bits do TIME
+ 361 01A4 80 EA	    lsr r0, r0, #5                      ; Desloca os 3 bits do TIME 5 bits para a direita 
+ 362 01A6 00 80	    add r0, r0, r0                      ; Adiciona o valor de r0 a ele mesmo, multiplicando por 2 para deslocar para a esquerda
+ 363 01A8 21 0C	    ldr r1, array_addr                  ; Guarda o endereco de memoria do array no registo r1 
+ 364 01AA 18 10	    ldr r8, [r1 ,r0]                    ; Guarda o valor do array no endereco calculado (r1 + r0) no registo r8 
+ 365 01AC 0F 04	    pop pc 
+ 366           	
+ 367           	array_addr:
+ 368 01AE 6C 02	    .word array
+ 369           	
+ 370           	; Rotina:    isr
+ 371           	; Descricao: Incrementa o valor da variável global sysclk.
+ 372           	; Entradas:  -
+ 373           	; Saidas:    -
+ 374           	; Efeitos:
+ 375           	isr: 
+ 376 01B0 00 24	    push r0
+ 377 01B2 01 24	    push r1
+ 378 01B4 81 0D	    ldr r1, sysclk_addr
+ 379 01B6 10 00	    ldr r0, [r1, #0]
+ 380 01B8 80 A0	    add r0, r0, #1
+ 381 01BA 10 20	    str r0, [r1,#0]
+ 382 01BC 00 64	    mov r0, #PTC_ADDRESS & 0xFF
+ 383 01BE F0 7F	    movt r0, #(PTC_ADDRESS >> 8) & 0xFF
+ 384 01C0 02 2B	    strb r2, [r0, #PTC_TIR]               ; Ativa o valor de TIR que é active LOW de modo a sair do pTC a saida nINT ativa que demonstra o pedido de interrupção
+ 385 01C2 01 04	    pop r1
+ 386 01C4 00 04	    pop r0
+ 387 01C6 20 B0	    movs pc, lr
+ 388           	
+ 389           	; Rotina: sysclk_init
+ 390           	; Descricao: Inicia uma nova contagem no periferico pTC com o intervalo de
+ 391           	;            contagem recebido em R0, em ticks, limpando eventuais pedidos de
+ 392           	;            interrupcao pendentes e iniciando com o valor zero a variavel
+ 393           	;            global sysclk.
+ 394           	;            Interface exemplo: void sysclk_init( uint8_t interval );
+ 395           	; Entradas:  R0 - Valor do novo intervalo de contagem, em ticks.
+ 396           	; Saidas:    -
+ 397           	; Efeitos:   Inicia a contagem no periferico a partir do valor zero, limpando
+ 398           	;            eventuais pedidos de interrupcao pendentes e iniciando com o
+ 399           	;            valor zero a variavel global sysclk
+ 400           	sysclk_init:
+ 401 01C8 0E 24		push lr 
+ 402 01CA 04 24	    push r4
+ 403 01CC 05 24	    push r5
+ 404 01CE 04 60	    mov r4, #0 
+ 405 01D0 A5 0C	    ldr r5, sysclk_addr
+ 406 01D2 54 20	    str r4, [r5]
+ 407 01D4 00 B0	    mov r0, r0 
+ 408 01D6 2F 5C	    bl ptc_init 
+ 409 01D8 05 B0	    mov r5, r0
+ 410 01DA 05 04	    pop r5
+ 411 01DC 04 04	    pop r4
+ 412 01DE 0F 04	    pop pc
+ 413           	
+ 414           	; Rotina: sysclk_get_ticks
+ 415           	; Descricao: Devolve o valor corrente da variável global sysclk.
+ 416           	;            Interface exemplo: uint16_t sysclk_get_ticks ( );
+ 417           	; Entradas:  -
+ 418           	; Saidas:    
+ 419           	; Efeitos:   -
+ 420           	sysclk_get_ticks:
+ 421 01E0 21 0C	    ldr r1 , sysclk_addr
+ 422 01E2 10 08	    ldrb r0, [r1, #0] 
+ 423 01E4 0F B7	    mov pc, lr
+ 424           	
+ 425           		sysclk_addr:
+ 426 01E6 68 02			.word sysclk
+ 427           	
+ 428           	; Gestor de periférico para o porto de entrada
+ 429           	;
+ 430           	
+ 431           	; Rotina:    inport_read
+ 432           	; Descricao: Adquire e devolve o valor corrente do porto de entrada.
+ 433           	;            Interface exemplo: uint8_t inport_read( );
+ 434           	; Entradas:  -
+ 435           	; Saidas:    R0 - valor adquirido do porto de entrada
+ 436           	; Efeitos:   -
+ 437           	inport_read:
+ 438 01E8 21 0C		ldr	r1, inport_addr
+ 439 01EA 10 08		ldrb r0, [r1, #0]
+ 440 01EC 0F B7		mov	pc, lr
+ 441           	
+ 442           	inport_addr:
+ 443 01EE 80 FF		.word	INPORT_ADDRESS
+ 444           	
+ 445           	; Gestor de periférico para o porto de saída
+ 446           	;
+ 447           	
+ 448           	; Rotina: outport_write_bits 
+ 449           	; Descricao: Atribui aos bits do porto de saida identificados com o valor 1 em R0 o valor dos bits correspondentes de R1
+ 450           	outport_write_bits:
+ 451 01F0 0E 24	    push lr
+ 452 01F2 C2 0D	    ldr r2, outport_img_addr
+ 453 01F4 23 00	    ldr r3, [ r2, #0]
+ 454 01F6 81 C0	    and r1, r0, r1
+ 455 01F8 10 B0	    mvn r0, r0
+ 456 01FA 30 C0	    and r0, r3, r0
+ 457 01FC 80 C8	    orr r0, r0, r1
+ 458 01FE 20 28	    strb r0, [ r2, #0]
+ 459 0200 16 5C	    bl outport_write
+ 460 0202 0F 04	    pop pc
+ 461           	
+ 462           	; Rotina:    outport_set_bits
+ 463           	; Descricao: Atribui o valor logico 1 aos bits do porto de saida identificados
+ 464           	;            com o valor 1 em R0. O valor dos outros bits nao e alterado.
+ 465           	;            Interface exemplo: void outport_set_bits( uint8_t pins_mask );
+ 466           	; Entradas:  R0 - Mascara com a especificacao do indice dos bits a alterar.
+ 467           	; Saidas:    -
+ 468           	; Efeitos:   Altera o valor da variavel global outport_img.
+ 469           	outport_set_bits:
+ 470 0204 0E 24		push lr
+ 471 0206 21 0D		ldr	r1, outport_img_addr
+ 472 0208 12 08		ldrb r2, [r1, #0]
+ 473 020A 20 C8		orr	r0, r2, r0
+ 474 020C 10 28		strb r0, [r1, #0]
+ 475 020E 0F 5C		bl	outport_write
+ 476 0210 0F 04		pop	pc
+ 477           	
+ 478           	; Rotina:    outport_clear_bits
+ 479           	; Descricao: Atribui o valor logico 0 aos bits do porto de saida identificados
+ 480           	;            com o valor 1 em R0. O valor dos outros bits nao e alterado.
+ 481           	;            Interface exemplo: void outport_clear_bits( uint8_t pins_mask );
+ 482           	; Entradas:  R0 - Mascara com a especificacao do indice dos bits a alterar.
+ 483           	; Saidas:    -
+ 484           	; Efeitos:   Altera o valor da variavel global outport_img.
+ 485           	outport_clear_bits:
+ 486 0212 0E 24		push lr
+ 487 0214 B1 0C		ldr	r1, outport_img_addr
+ 488 0216 12 08		ldrb r2, [r1, #0]
+ 489 0218 10 B0		mvn	r0, r0
+ 490 021A 20 C0		and	r0, r2, r0
+ 491 021C 10 28		strb r0, [r1]
+ 492 021E 07 5C		bl	outport_write
+ 493 0220 0F 04		pop	pc
+ 494           	
+ 495           	; Rotina:    outport_init
+ 496           	; Descricao: Faz a iniciacao do porto de saida, nele estabelecendo o valor
+ 497           	;            recebido em R0.
+ 498           	;            Interface exemplo: void outport_init( uint8_t value );
+ 499           	; Entradas:  R0 - Valor a atribuir ao porto de saida.
+ 500           	; Saidas:    -
+ 501           	; Efeitos:   Altera o valor da variavel global outport_img.
+ 502           	outport_init:
+ 503 0222 0E 24		push lr
+ 504 0224 31 0C		ldr	r1, outport_img_addr
+ 505 0226 10 28		strb r0, [r1]
+ 506 0228 02 5C		bl	outport_write
+ 507 022A 0F 04		pop	pc
+ 508           	
+ 509           	outport_img_addr:
+ 510 022C 66 02		.word	outport_img
+ 511           	
+ 512           	; Rotina:    outport_write
+ 513           	; Descricao: Escreve no porto de saida o valor recebido em R0.
+ 514           	;            Interface exemplo: void outport_write( uint8_t value );
+ 515           	; Entradas:  R0 - valor a atribuir ao porto de saida.
+ 516           	; Saidas:    -
+ 517           	; Efeitos:   -
+ 518           	outport_write:
+ 519 022E 21 0C		ldr	r1, outport_addr
+ 520 0230 10 28		strb  r0, [r1, #0]
+ 521 0232 0F B7		mov	pc, lr
+ 522           	
+ 523           	outport_addr:
+ 524 0234 C0 FF		.word	OUTPORT_ADDRESS
+ 525           	
+ 526           	; Gestor de periférico para o Pico Timer/Counter (pTC)
+ 527           	;
+ 528           	
+ 529           	; Rotina:    ptc_init
+ 530           	; Descricao: Faz a iniciacao do periférico pTC, habilitando o seu funcionamento
+ 531           	;            em modo continuo e com o intervalo de contagem recebido em R0, em
+ 532           	;            ticks.
+ 533           	;            Interface exemplo: void ptc_init( uint8_t interval );
+ 534           	; Entradas:  R0 - Valor do novo intervalo de contagem, em ticks.
+ 535           	; Saidas:    -
+ 536           	; Efeitos:   Inicia a contagem no periferico a partir do valor zero, limpando
+ 537           	;            o pedido de interrupcao eventualmente pendente.
+ 538           	ptc_init:
+ 539 0236 0E 24	    push lr
+ 540 0238 51 0D		ldr	r1, PTC_ADDR
+ 541 023A 12 60		mov	r2, #PTC_CMD_STOP
+ 542 023C 12 28		strb r2, [r1, #PTC_TCR]
+ 543 023E 10 29		strb r0, [r1, #PTC_TMR]
+ 544 0240 0E 5C	    bl  ptc_clr_irq
+ 545 0242 02 60		mov	r2, #PTC_CMD_START
+ 546 0244 12 28		strb r2, [r1, #PTC_TCR]
+ 547 0246 0F 04		pop pc
+ 548           	
+ 549           	; Rotina:    ptc_start
+ 550           	; Descricao: Habilita a contagem no periferico pTC.
+ 551           	;            Interface exemplo: void ptc_start( );
+ 552           	; Entradas:  -
+ 553           	; Saidas:    -
+ 554           	; Efeitos:   -
+ 555           	ptc_start:
+ 556 0248 D0 0C		ldr	r0, PTC_ADDR
+ 557 024A 01 60		mov	r1, #PTC_CMD_START
+ 558 024C 01 28		strb r1, [r0, #PTC_TCR]
+ 559 024E 0F B7		mov	pc, lr
+ 560           	
+ 561           	; Rotina:    ptc_stop
+ 562           	; Descricao: Para a contagem no periferico pTC.
+ 563           	;            Interface exemplo: void ptc_stop( );
+ 564           	; Entradas:  -
+ 565           	; Saidas:    -
+ 566           	; Efeitos:   O valor do registo TC do periferico e colocado a zero.
+ 567           	ptc_stop:
+ 568 0250 90 0C		ldr	r0, PTC_ADDR
+ 569 0252 11 60		mov	r1, #PTC_CMD_STOP
+ 570 0254 01 28		strb r1, [r0, #PTC_TCR]
+ 571 0256 0F B7		mov	pc, lr
+ 572           	
+ 573           	; Rotina:    ptc_get_value
+ 574           	; Descricao: Devolve o valor corrente da contagem do periferico pTC.
+ 575           	;            Interface exemplo: uint8_t ptc_get_value( );
+ 576           	; Entradas:  -
+ 577           	; Saidas:    R0 - O valor corrente do registo TC do periferico.
+ 578           	; Efeitos:   -
+ 579           	ptc_get_value:
+ 580 0258 51 0C		ldr	r1, PTC_ADDR
+ 581 025A 10 0A		ldrb r0, [r1, #PTC_TC]
+ 582 025C 0F B7		mov	pc, lr
+ 583           	
+ 584           	; Rotina:    ptc_clr_irq
+ 585           	; Descricao: Sinaliza o periferico pTC que foi atendido um pedido de
+ 586           	;            interrupção.
+ 587           	;            Interface exemplo: void ptc_clr_irq( );
+ 588           	; Entradas:  -
+ 589           	; Saidas:    -
+ 590           	; Efeitos:   -
+ 591           	ptc_clr_irq:
+ 592 025E 20 0C		ldr	r0, PTC_ADDR
+ 593 0260 01 2B		strb r1, [r0, #PTC_TIR]
+ 594 0262 0F B7		mov	pc, lr
+ 595           	
+ 596           	PTC_ADDR:
+ 597 0264 40 FF		.word	PTC_ADDRESS
+ 598           	
+ 599           	; Seccao:    data
+ 600           	; Descricao: Guarda as variáveis globais
+ 601           		.data 
+ 602           	outport_img:
+ 603 0266 00   		.space	1
+ 604           	
+ 605 0267 00  		.align
+ 606           	sysclk:
+ 607 0268 00   		.space	2
+ 607 0269 00
+ 608           	
+ 609           	previous_button_addr1:
+ 610 026A 00   	    .space 2
+ 610 026B 00
+ 611           	
+ 612           	array: 
+ 613          	    .word 100, 200, 300, 400, 600, 600, 600, 600
+ 613 026C 64 00 C8 00 2C 01 90 01 58 02 58 02 58 02 58 02
+ 614           	
+ 615           	; Seccao:    stack
+ 616           	; Descricao: Implementa a pilha com o tamanho definido pelo simbolo STACK_SIZE
+ 617           		.stack 
+ 618 027C 00   		.space	STACK_SIZE
+ 618 .... ..
+ 618 02BB 00
+ 619           	stack_top:
+ 619           	
